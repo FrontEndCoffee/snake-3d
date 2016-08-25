@@ -1,0 +1,18 @@
+{
+  "name": "snake",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "open app/index.html & npm run watch",
+    "dev": "browserify app/js/src/app.js -o app/js/app.min.js -d",
+    "watch": "watch -p 'app/js/src/**/*.js' -c 'npm run dev'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^13.1.0",
+    "watch-cli": "^0.2.1"
+  }
+}

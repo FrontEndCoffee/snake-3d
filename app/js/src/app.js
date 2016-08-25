@@ -60,6 +60,15 @@ window.onmousemove = function(e) {
   const frontpaneVertecies = blockEntity.getVerticies()
   const backpaneVertecies = frontpaneVertecies.map(addPerspective)
 
+  context.fillStyle = 'dodgerblue'
+  fillPoly([
+    new Vector(-10,-15),
+    new Vector( 10,-15),
+    new Vector( 15,  0),
+    new Vector( 10, 15),
+    new Vector(-10, 15),
+    new Vector(-15,  0)
+  ])
 
   // draw backpane dots (#777)
   context.fillStyle = '#777'
@@ -80,6 +89,8 @@ window.onmousemove = function(e) {
     const frontpaneVertex = frontpaneVertecies[i]
     drawLine(vertexVector, frontpaneVertex)
   })
+
+
 
   // draw frontpane lines (#fff)
   context.strokeStyle = '#fff'
@@ -104,6 +115,18 @@ function clearFrame() {
     canvasSize.x,
     canvasSize.y
   )
+}
+
+function fillPoly(vertecies) {
+  context.beginPath()
+  vertecies.forEach((v, i) => {
+    if (i === 0) {
+      context.moveTo(v.x, v.y)
+    } else {
+      context.lineTo(v.x, v.y)
+    }
+  })
+  context.fill()
 }
 
 function drawLine(vector1, vector2) {

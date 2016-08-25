@@ -27,6 +27,7 @@ const blockShape = new Polygon([
 const blockEntity = new Entity(blockShape, position)
 blockEntity.position = new Vector(12, 23)
 
+console.log('sourcemap test')
 
 // init
 context.translate(canvasSize.x/2, canvasSize.y/2)

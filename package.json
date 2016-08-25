@@ -1,18 +1,19 @@
 {
   "name": "snake",
   "version": "1.0.0",
-  "description": "",
+  "description": "A 2.5D version of the old-school game snake",
+  "repository": "git@github.com:FrontEndCoffee/snake-2.5.git",
   "main": "index.js",
   "scripts": {
-    "start": "open app/index.html & npm run watch",
-    "dev": "browserify app/js/src/app.js -o app/js/app.min.js -d",
-    "watch": "watch -p 'app/js/src/**/*.js' -c 'npm run dev'",
+    "start": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "browserify": "^13.1.0",
-    "watch-cli": "^0.2.1"
+  "dependencies": {},
+  "devDependencies": {
+    "babel-core": "^6.14.0",
+    "babel-loader": "^6.2.5",
+    "webpack": "^1.13.2"
   }
 }

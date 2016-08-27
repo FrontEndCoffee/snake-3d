@@ -8,22 +8,42 @@
         margin: 0;
         background: #333;
       }
-      canvas {
+      .container {
         max-width: calc(100vw - 24px);
         max-height: calc(100vh - 24px);
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: #000;
+        background: orangered;
         border-radius: 2pt;
         box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      }
+      .numbers-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .numbers-container > div {
+        padding: 0.5em;
+        font-size: large;
+        font-family: sans-serif;
+      }
+      canvas {
         cursor: crosshair;
+        background: black;
       }
     </style>
   </head>
   <body>
-    <canvas id="canvas" width="800" height="600"></canvas>
+    <div class="container">
+      <div class="numbers-container">
+        <div id="score"></div>
+        <div id="highscore"></div>
+        <div id="death"></div>
+      </div>
+      <canvas id="canvas" width="800" height="600"></canvas>
+    </div>
     <script type="text/javascript" src="js/app.min.js"></script>
   </body>
 </html>

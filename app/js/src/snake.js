@@ -22,7 +22,13 @@ export class Snake {
     const tailEndPos = (this.tail[this.tail.length-1] || this).position
     const snake = this
 
-    if (grow) this.game.score++
+    if (grow) {
+      window.score++
+      if (window.score > window.highscore) {
+        window.highscore = window.score
+      }
+      window.updateScore()
+    }
 
     this.tail = this.tail.map((segment, i) => {
       if (i===snake.tail.length-1) {
@@ -44,7 +50,9 @@ export class Snake {
   }
 
   die() {
-    this.game.deaths++
+    window.deaths++
+    window.score = 0
+    window.updateScore()
     this.constructor()
   }
 

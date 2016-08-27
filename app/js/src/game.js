@@ -11,24 +11,21 @@ export class Game {
     this.gridWidth = gridWidth
     this.context = context
     this.canvas = canvas
-    this.score = 0
-    this.deaths = 0
     this.snake = new Snake(this)
     this.drawQueue = new DrawQueue()
     this.food = this.genFood()
   }
 
   init() {
-    this.update()
-    this.redraw()
+    this.update(this)
+    this.redraw(this)
   }
 
   newFood() {
     this.food = this.genFood()
   }
 
-  update() {
-    console.log(this.snake)
+  update(game) {
     const snakePos = new Vector(
       this.snake.position.x * this.canvas.width/this.gridWidth,
       this.snake.position.y * this.canvas.height/this.gridHeight
@@ -47,10 +44,13 @@ export class Game {
           this.snake.die()
     }
 
-    setTimeout(this.update, 500 * Math.pow(0.9, this.score))
+    setTimeout(
+      () => game.update(game),
+      500 * Math.pow(0.9, window.score)
+    )
   }
 
-  redraw() {
+  redraw(game) {
     this.context.clearRect(
       -this.canvas.width/2,
       -this.canvas.height/2,
@@ -69,21 +69,23 @@ export class Game {
       item.entity.fill3d(this.context, item.colors[0], item.colors[1])
     })
     this.drawQueue.reset()
+
+    requestAnimationFrame(() => game.redraw(game))
   }
 
-  handleKeyInput(event) {
+  handleKeyInput(event, game) {
     switch(event.key) {
       case "ArrowUp":
-        this.snake.direction = Snake.DIRECTION_NORTH
+        game.snake.direction = Snake.DIRECTION_NORTH
         break
       case "ArrowRight":
-        this.snake.direction = Snake.DIRECTION_EAST
+        game.snake.direction = Snake.DIRECTION_EAST
         break
       case "ArrowDown":
-        this.snake.direction = Snake.DIRECTION_SOUTH
+        game.snake.direction = Snake.DIRECTION_SOUTH
         break
       case "ArrowLeft":
-        this.snake.direction = Snake.DIRECTION_WEST
+        game.snake.direction = Snake.DIRECTION_WEST
         break
     }
   }

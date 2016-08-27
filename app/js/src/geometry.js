@@ -1,23 +1,28 @@
 'use strict'
 
 export class Vector {
+
   constructor(x, y) {
     this.x = x
     this.y = y
   }
+
   add(vector) {
     return new Vector(
       this.x + vector.x,
       this.y + vector.y
     )
   }
+
 }
 
 export class Line {
+
   constructor(v1, v2) {
     this.v1 = v1
     this.v2 = v2
   }
+
   stroke(context, color) {
     const oldColor = context.strokeStyle
     context.strokeStyle = color
@@ -27,39 +32,49 @@ export class Line {
     context.stroke()
     context.strokeStyle = oldColor
   }
+
   get dX() {
     return this.v2.x - this.v1.x
   }
+
   get dY() {
     return this.v2.y - this.v1.y
   }
+
   get length() {
     return Math.sqrt(
-      Math.pow(this.getDeltaX(), 2) +
-      Math.pow(this.getDeltaY(), 2)
+      Math.pow(this.dX, 2) +
+      Math.pow(this.dY, 2)
     )
   }
+
 }
 
-export const PERSPECTIVE_CONSTANT = 0.875
+// export const PERSPECTIVE_CONSTANT = 0.875
+export const PERSPECTIVE_CONSTANT = 0.950
+export const ADDED_THIKNESS = -0.1
 export class Entity {
 
   constructor(vertecies, posVector) {
     this.position = posVector
     this.vertecies = vertecies
   }
+
   get absVertecies() {
     return this.vertecies.map(vector => vector.add(this.position))
   }
+
   get perspectiveVertecies() {
     return this.absVertecies.map(vertex => new Vector(
-      vertex.x * PERSPECTIVE_CONSTANT,
-      vertex.y * PERSPECTIVE_CONSTANT
+      vertex.x * PERSPECTIVE_CONSTANT + ADDED_THIKNESS,
+      vertex.y * PERSPECTIVE_CONSTANT + ADDED_THIKNESS
     ))
   }
+
   translate(x,y) {
     this.position = this.position.add(new Vector(x,y))
   }
+
   fill(context, color) {
     const oldStyle = context.fillStyle
     context.fillStyle = color
@@ -74,9 +89,11 @@ export class Entity {
     context.fill()
     context.fillStyle = oldStyle
   }
+
   stroke(context, color) {
     strokePoly(this.absVertecies, context, color)
   }
+
   stroke3d(context, fgColor, bgColor) {
     const oldStyle = context.strokeStyle
     strokePoly(this.perspectiveVertecies, context, bgColor)
@@ -86,6 +103,7 @@ export class Entity {
     })
     strokePoly(this.absVertecies, context, fgColor)
   }
+
   fill3d(context, fgColor, bgColor) {
     const entity = this
     this.perspectiveVertecies.forEach(function(currBackVertex, i, vertecies) {
@@ -101,6 +119,7 @@ export class Entity {
     })
     fillPoly(entity.absVertecies, context, fgColor)
   }
+
 }
 
 export class Rect extends Entity {

@@ -2,6 +2,6 @@
 a 2.5d snake game
 
 
-### my progress on the engine so far:
+### The game currently looks like this
 
-![progress](http://i.imgur.com/zCus69P.png)
+![progress](http://i.imgur.com/jrliQQ5.png)

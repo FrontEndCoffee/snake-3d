@@ -8,6 +8,22 @@
         margin: 0;
         background: #333;
       }
+      .billboard {
+        font-weight: bold;
+        font-family: sans-serif;
+        font-size: 40px;
+        text-align: center;
+        margin: 0.5em 0;
+      }
+      .billboard > .subtitle {
+        font-size: 16px;
+        line-height: 24px;
+        font-weight: normal;
+      }
+      .billboard > .subtitle > a {
+        color: #333;
+        text-decoration: none;
+      }
       .container {
         max-width: calc(100vw - 24px);
         max-height: calc(100vh - 24px);
@@ -37,6 +53,13 @@
   </head>
   <body>
     <div class="container">
+      <div class="billboard">
+        Snake 2.5D
+        <div class="subtitle">
+          By: <a href="https://twitter.com/FrontEndCoffee" target="_blank">@FrontEndCoffee</a>
+           | Source: <a href="https://github.com/FrontEndCoffee/snake-2.5" target="_blank">GitHub</a>
+        </div>
+      </div>
       <div class="numbers-container">
         <div id="score"></div>
         <div id="highscore"></div>

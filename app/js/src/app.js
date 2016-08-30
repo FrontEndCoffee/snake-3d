@@ -1,6 +1,6 @@
 'use strict'
 
-import {Game} from './game'
+import {game} from './game'
 
 const canvas = document.getElementById('canvas')
 const context = canvas.getContext('2d')
@@ -13,8 +13,13 @@ window.updateScore = () => {
   document.getElementById('highscore').innerText = 'highscore: '+ window.highscore
   document.getElementById('death').innerText = 'death count: '+ window.deaths
 }
-const snakeGame = new Game(canvas, context, 32, 24)
-window.onkeydown = event => snakeGame.handleKeyInput(event, snakeGame)
+const snakeGame = game({
+  canvas,
+  context,
+  gridWidth: 32,
+  gridHeight: 24
+})
+window.onkeydown = snakeGame.handleKeyInput
 
 snakeGame.init()
 window.updateScore()

@@ -1,158 +1,85 @@
 'use strict'
 
-export class Vector {
-
-  constructor(x, y) {
-    this.x = x
-    this.y = y
-  }
-
-  add(vector) {
-    return new Vector(
-      this.x + vector.x,
-      this.y + vector.y
-    )
-  }
-
-}
-
-export class Line {
-
-  constructor(v1, v2) {
-    this.v1 = v1
-    this.v2 = v2
-  }
-
-  stroke(context, color) {
-    const oldColor = context.strokeStyle
-    context.strokeStyle = color
-    context.beginPath()
-    context.moveTo(this.v1.x, this.v1.y)
-    context.lineTo(this.v2.x, this.v2.y)
-    context.stroke()
-    context.strokeStyle = oldColor
-  }
-
-  get dX() {
-    return this.v2.x - this.v1.x
-  }
-
-  get dY() {
-    return this.v2.y - this.v1.y
-  }
-
-  get length() {
-    return Math.sqrt(
-      Math.pow(this.dX, 2) +
-      Math.pow(this.dY, 2)
-    )
-  }
-
-}
-
-// export const PERSPECTIVE_CONSTANT = 0.875
 export const PERSPECTIVE_CONSTANT = 0.950
 export const ADDED_THIKNESS = -0.1
-export class Entity {
 
-  constructor(vertecies, posVector) {
-    this.position = posVector
-    this.vertecies = vertecies
-  }
-
-  get absVertecies() {
-    return this.vertecies.map(vector => vector.add(this.position))
-  }
-
-  get perspectiveVertecies() {
-    return this.absVertecies.map(vertex => new Vector(
-      vertex.x * PERSPECTIVE_CONSTANT + ADDED_THIKNESS,
-      vertex.y * PERSPECTIVE_CONSTANT + ADDED_THIKNESS
-    ))
-  }
-
-  translate(x,y) {
-    this.position = this.position.add(new Vector(x,y))
-  }
-
-  fill(context, color) {
-    const oldStyle = context.fillStyle
-    context.fillStyle = color
-    context.beginPath()
-    this.absVertecies.forEach((v, i) => {
-      if (i === 0) {
-        context.moveTo(v.x, v.y)
-      } else {
-        context.lineTo(v.x, v.y)
-      }
-    })
-    context.fill()
-    context.fillStyle = oldStyle
-  }
-
-  stroke(context, color) {
-    strokePoly(this.absVertecies, context, color)
-  }
-
-  stroke3d(context, fgColor, bgColor) {
-    const oldStyle = context.strokeStyle
-    strokePoly(this.perspectiveVertecies, context, bgColor)
-    this.absVertecies.forEach((vertex, i) => {
-      const vertex2 = this.perspectiveVertecies[i]
-      new Line(vertex, vertex2).stroke(context, bgColor)
-    })
-    strokePoly(this.absVertecies, context, fgColor)
-  }
-
-  fill3d(context, fgColor, bgColor) {
-    const entity = this
-    this.perspectiveVertecies.forEach(function(currBackVertex, i, vertecies) {
-      const nextBackVertex = vertecies[(i + 1) % vertecies.length]
-      const currFrontVertex = entity.absVertecies[i]
-      const nextFrontVertex = entity.absVertecies[(i + 1) % entity.absVertecies.length]
-      fillPoly([
-        currFrontVertex,
-        nextFrontVertex,
-        nextBackVertex,
-        currBackVertex
-      ], context, bgColor)
-    })
-    fillPoly(entity.absVertecies, context, fgColor)
-  }
-
-}
-
-export class Rect extends Entity {
-  constructor(width = 100, height = 100, xPos = 0, yPos = 0) {
-    super([
-      new Vector( width/2, -height/2),
-      new Vector( width/2,  height/2),
-      new Vector(-width/2,  height/2),
-      new Vector(-width/2, -height/2)
-    ], new Vector(xPos, yPos))
+export function v(x, y) {
+  const _x = x,
+      _y = y
+  return {
+    getX: () => _x,
+    getY: () => _y,
+    add: vec => v(_x + vec.getX(), _y + vec.getY())
   }
 }
 
-// functions
+export function line(v1, v2) {
+  const _v1 = v1,
+        _v2 = v2,
 
-function strokePoly(polygon, context, color) {
-  polygon.forEach((curr, i, vertList) => {
-    const next = vertList[ (i + 1) % vertList.length ]
-    new Line(curr, next).stroke(context, color)
-  })
+        dX = () => _v2.getX() - _v1.getX(),
+        dY = () => _v2.getY() - _v1.getY()
+  return {
+    stroke: (context, color) => {
+      const oldColor = context.strokeStyle
+      context.strokeStyle = color
+      context.beginPath()
+      context.moveTo(_v1.getX(), _v1.getY())
+      context.lineTo(_v2.getX(), _v2.getY())
+      context.stroke()
+      context.strokeStyle = oldColor
+    },
+    dX: dX,
+    dY: dY,
+    length: () => Math.sqrt( Math.pow( dX(), 2 ) + Math.pow( dY(), 2 ) )
+  }
 }
 
-function fillPoly(polygon, context, color) {
-  const oldColor = context.fillStyle
-  context.fillStyle = color
-  context.beginPath()
-  polygon.forEach((v, i) => {
-    if (i === 0) {
-      context.moveTo(v.x, v.y)
-    } else {
-      context.lineTo(v.x, v.y)
-    }
-  })
-  context.fill()
-  context.fillStyle = oldColor
+export function entity(verts, pos) {
+  let _pos = pos
+  const _verts = verts,
+        absVerts = () => _verts.map(x => x.add(_pos)),
+        bgVerts = () => absVerts().map(vec => v(
+          vec.getX() * PERSPECTIVE_CONSTANT + ADDED_THIKNESS,
+          vec.getY() * PERSPECTIVE_CONSTANT + ADDED_THIKNESS
+        )),
+        strokePoly = (verts, context, color) => {
+          verts.foreach((curr, i) => {
+            const next = verts[ (i + 1) % verts.length ]
+            line(curr, next).stroke(context, color)
+          })
+        },
+        fillPoly = (verts, context, color) => {
+          const oldColor = context.fillStyle
+          context.fillStyle = color
+          context.beginPath()
+          verts.forEach((vec, i) => {
+            if (i === 0) {
+              context.moveTo(vec.getX(), vec.getY())
+            } else {
+              context.lineTo(vec.getX(), vec.getY())
+            }
+          })
+          context.fill()
+          context.fillStyle = oldColor
+        }
+  return {
+    translate: (x,y) => _pos = _pos.add( v(x,y) ),
+    fill: (context, color) => fillPoly(_verts, context, color),
+    stroke: (context, color) => strokePoly(_verts, context, color),
+    fill3d: (context, fgColor, bgColor) => {
+      bgVerts().forEach((currBack, i) => {
+        const nextBack = bgVerts()[(i+1)%bgVerts().length],
+              currFront = absVerts()[i],
+              nextFront = absVerts()[(i+1)%absVerts().length]
+        fillPoly([currFront, nextFront, nextBack, currBack], context, bgColor)
+      })
+      fillPoly(absVerts(), context, fgColor)
+    },
+    getPos: () => _pos
+  }
+}
+
+export function rect(x,y,w,h) {
+  return entity([v(w/2,-h/2), v(w/2,h/2), v(-w/2,h/2), v(-w/2,-h/2)], v(x,y))
 }

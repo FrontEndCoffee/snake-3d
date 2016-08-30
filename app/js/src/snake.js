@@ -1,70 +1,49 @@
 'use strict'
 
-import {Vector} from './geometry'
+import {v} from './geometry'
 import _ from 'underscore'
 
-export class Snake {
+export const DIRECTION_NORTH = v(0,-1)
+export const DIRECTION_EAST = v(1,0)
+export const DIRECTION_SOUTH = v(0,1)
+export const DIRECTION_WEST = v(-1,0)
 
-  static get DIRECTION_NORTH() { return new Vector(0,-1) }
-  static get DIRECTION_EAST() { return new Vector(1,0) }
-  static get DIRECTION_SOUTH() { return new Vector(0,1) }
-  static get DIRECTION_WEST() { return new Vector(-1,0) }
-
-  constructor(game) {
-    this.game = game
-    this.position = new Vector(0,0)
-    this.tail = []
-    this.direction = Snake.DIRECTION_NORTH
-  }
-
-  update(grow = false) {
-
-    const tailEndPos = (this.tail[this.tail.length-1] || this).position
-    const snake = this
-
-    if (grow) {
-      window.score++
-      if (window.score > window.highscore) {
-        window.highscore = window.score
-      }
-      window.updateScore()
-    }
-
-    this.tail = this.tail.map((segment, i) => {
-      if (i===snake.tail.length-1) {
-        segment.position = snake.position
-      } else {
-        segment.position = snake.tail[i+1].position
-      }
-      return segment
-    })
-
-    this.position = this.position.add(this.direction)
-    if (grow) this.tail.unshift(new SnakeSegment(tailEndPos))
-
-    this.tail.forEach(segment => {
-      if (_.isEqual(snake.position, segment.position)) {
-        snake.die()
-      }
-    })
-  }
-
-  die() {
+export function snake() {
+  let _pos = v(0,0),
+      _tail = [],
+      _dir = DIRECTION_NORTH
+  const die = () => {
     window.deaths++
     window.score = 0
     window.updateScore()
-    this.constructor()
+    _pos = v(0,0)
+    _tail = []
+    _dir = DIRECTION_NORTH
   }
-
-  get segments() {
-    return [this.position].concat(
-      this.tail.map(segment => segment.position)
-    )
-  }
-
-}
-export class SnakeSegment {
-  constructor(pos) {
-    this.position = pos
+  return {
+    die: die,
+    setDir: dir => _dir = dir,
+    update: (grow = false) => {
+      // get coordinates for new tail segment
+      const tailEndPos = _tail[_tail.length-1] || _pos
+      // update the scoreboard
+      if (grow) {
+        window.score++
+        if (window.score > window.highscore) {
+          window.highscore = window.score
+        }
+        window.updateScore()
+      }
+      // move the tail segments
+      _tail = _tail.map((vec, i) => (i===_tail.length-1) ? _pos : _tail[i+1])
+      // move the head
+      _pos = _pos.add(_dir)
+      // add a new segment
+      if (grow) _tail.unshift(tailEndPos)
+      // check for self collision
+      _tail.forEach(vec => {if (_.isEqual(_pos, vec)) die()})
+    },
+    getTail: () => _tail.concat([_pos]),
+    getPos: () => _pos
   }
 }

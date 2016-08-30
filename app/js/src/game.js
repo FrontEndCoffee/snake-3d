@@ -1,133 +1,96 @@
 'use strict'
 
 import _ from 'underscore'
-import { Vector, Entity, Line, Rect } from './geometry'
-import { Snake } from './snake'
+import { v, entity, line, rect } from './geometry'
+import * as s from './snake'
 
-export class Game {
+export function game(params) {
+  const {canvas, context, gridWidth, gridHeight} = params,
+        X_SCL = canvas.width / gridWidth,
+        Y_SCL = canvas.height / gridHeight,
+        snake = s.snake(),
+        renderQueue = drawQueue(),
 
-  constructor(canvas, context, gridWidth, gridHeight) {
-    this.gridHeight = gridHeight
-    this.gridWidth = gridWidth
-    this.context = context
-    this.canvas = canvas
-    this.snake = new Snake(this)
-    this.drawQueue = new DrawQueue()
-    this.food = this.genFood()
-  }
+        update = () => {
+          const snakeHeadPos =
+            v(snake.getPos().getX() * X_SCL, snake.getPos().getY() * Y_SCL)
 
-  init() {
-    this.update(this)
-    this.redraw(this)
-  }
+          // handle eating logic
+          if (_.isEqual(food.getPos(), snakeHeadPos)) {
+            snake.update(true)
+            food = generateFood()
+          } else {
+            snake.update()
+          }
 
-  newFood() {
-    this.food = this.genFood()
-  }
+          // check for level border collision
+          if (snake.getPos().getX() > gridWidth/2 ||
+              snake.getPos().getY() > gridHeight/2 ||
+              snake.getPos().getX() < -gridWidth/2 ||
+              snake.getPos().getY() < -gridHeight/2) {
+                snake.die()
+          }
 
-  update(game) {
-    const snakePos = new Vector(
-      this.snake.position.x * this.canvas.width/this.gridWidth,
-      this.snake.position.y * this.canvas.height/this.gridHeight
-    )
-    if (_.isEqual(this.food.position, snakePos)) {
-      this.snake.update(true)
-      this.newFood()
-    } else {
-      this.snake.update()
+          // handle timing logic
+          setTimeout(update, 500 * Math.pow(0.9, window.score))
+        },
+        redraw = () => {
+          // clear frame
+          context.clearRect(
+            -canvas.width/2, -canvas.height/2, canvas.width, canvas.height
+          )
+          // prepare snake for drawing
+          snake.getTail()
+               .map(vec => genPx(vec.getX(), vec.getY()))
+               .forEach(rect => renderQueue.add(rect, ['orangered', 'darkred']))
+          // prepare food for drawing
+          renderQueue.add(food, ['lime', 'green'])
+
+          // draw queue
+          renderQueue.sort()
+          renderQueue.forEach(item =>
+            item.entity.fill3d(context, item.colors[0], item.colors[1]))
+          renderQueue.reset()
+
+          requestAnimationFrame(redraw)
+        },
+        genPx = (x,y) => rect(x * X_SCL, y * Y_SCL, X_SCL, Y_SCL),
+        generateFood = () => {
+          const h = gridHeight/2-2,
+                w = gridWidth/2-2,
+                x = _.random(-w,w),
+                y = _.random(-h,h)
+          return genPx(x,y)
+        }
+  let food = generateFood()
+
+  return {
+    init: () => {
+      update()
+      redraw()
+    },
+    handleKeyInput: e => {
+      // TODO : FIX
+      switch(e) {
+        case "ArrowUp": snake.setDir(s.DIRECTION_NORTH); break
+        case "ArrowRight": snake.setDir(s.DIRECTION_EAST); break
+        case "ArrowDown": snake.setDir(s.DIRECTION_SOUTH); break
+        case "ArrowLeft": snake.setDir(s.DIRECTION_WEST); break
+      }
     }
-
-    if (this.snake.position.x > this.gridWidth/2 ||
-        this.snake.position.y > this.gridHeight/2 ||
-        this.snake.position.x < -this.gridWidth/2 ||
-        this.snake.position.y < -this.gridHeight/2) {
-          this.snake.die()
-    }
-
-    setTimeout(
-      () => game.update(game),
-      500 * Math.pow(0.9, window.score)
-    )
-  }
-
-  redraw(game) {
-    this.context.clearRect(
-      -this.canvas.width/2,
-      -this.canvas.height/2,
-      this.canvas.width,
-      this.canvas.height
-    )
-    this.snake.segments
-      .map(vector => this.genPx(vector.x, vector.y))
-      .forEach(rect => this.drawQueue.add(rect, ['orangered', 'darkred']))
-
-    this.drawQueue.add(this.food, ['lime', 'green'])
-
-    // draw all queued entities
-    this.drawQueue.sort(DrawQueue.compareDist)
-    this.drawQueue.forEach(item => {
-      item.entity.fill3d(this.context, item.colors[0], item.colors[1])
-    })
-    this.drawQueue.reset()
-
-    requestAnimationFrame(() => game.redraw(game))
-  }
-
-  handleKeyInput(event, game) {
-    switch(event.key) {
-      case "ArrowUp":
-        game.snake.direction = Snake.DIRECTION_NORTH
-        break
-      case "ArrowRight":
-        game.snake.direction = Snake.DIRECTION_EAST
-        break
-      case "ArrowDown":
-        game.snake.direction = Snake.DIRECTION_SOUTH
-        break
-      case "ArrowLeft":
-        game.snake.direction = Snake.DIRECTION_WEST
-        break
-    }
-  }
-
-  genFood() {
-    const h = this.gridHeight/2-2
-    const w = this.gridWidth/2-2
-    const x = _.random(-w,w)
-    const y = _.random(-h,h)
-    return this.genPx(x,y)
-  }
-
-  genPx(x, y) {
-    const xScl = this.canvas.width / this.gridWidth
-    const yScl = this.canvas.height / this.gridHeight
-    return new Rect(xScl, yScl, x*xScl, y*yScl)
   }
 }
 
-class DrawQueue {
-  constructor(){
-    this.queue = []
-  }
-  add(entity, colors) {
-    const dist = new Line(entity.position, new Vector(0,0)).length
-    this.queue.push({entity, colors, dist})
-  }
-  reset() {
-    this.queue = []
-  }
-  map(fn) {
-    const res = this
-    res.queue = this.queue.map(fn)
-    return res
-  }
-  forEach(fn) {
-    this.queue.forEach(fn)
-  }
-  sort(compFn) {
-    this.queue.sort(compFn)
-  }
-  static compareDist(a, b) {
-    return b.dist - a.dist
+function drawQueue(queue) {
+  let _queue = queue || []
+  return {
+    reset: () => _queue = [],
+    add: (entity, colors) => {
+      const dist = line(entity.getPos(), v(0,0)).length()
+      _queue.push({entity, colors, dist})
+    },
+    map: fn => drawQueue(_queue.map(fn)),
+    forEach: fn => _queue.forEach(fn),
+    sort: () => _queue.sort((a,b) => b.dist - a.dist)
   }
 }

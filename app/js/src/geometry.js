@@ -9,7 +9,9 @@ export function v(x, y) {
   return {
     getX: () => _x,
     getY: () => _y,
-    add: vec => v(_x + vec.getX(), _y + vec.getY())
+    add: vec => v(_x + vec.getX(), _y + vec.getY()),
+    equals: vec => (_x === vec.getX() && _y === vec.getY()),
+    scale: vec => v(_x * vec.getX(), _y * vec.getY())
   }
 }
 

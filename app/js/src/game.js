@@ -12,11 +12,12 @@ export function game(params) {
         renderQueue = drawQueue(),
 
         update = () => {
-          const snakeHeadPos =
-            v(snake.getPos().getX() * X_SCL, snake.getPos().getY() * Y_SCL)
+          // determine positions of food and snake head
+          const foodPos = food.getPos().scale(v(1/X_SCL, 1/Y_SCL)),
+                headPos = snake.getPos().add(snake.getDir())
 
           // handle eating logic
-          if (_.isEqual(food.getPos(), snakeHeadPos)) {
+          if (headPos.equals(foodPos)) {
             snake.update(true)
             food = generateFood()
           } else {
@@ -70,8 +71,7 @@ export function game(params) {
       redraw()
     },
     handleKeyInput: e => {
-      // TODO : FIX
-      switch(e) {
+      switch(e.key) {
         case "ArrowUp": snake.setDir(s.DIRECTION_NORTH); break
         case "ArrowRight": snake.setDir(s.DIRECTION_EAST); break
         case "ArrowDown": snake.setDir(s.DIRECTION_SOUTH); break

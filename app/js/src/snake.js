@@ -41,9 +41,10 @@ export function snake() {
       // add a new segment
       if (grow) _tail.unshift(tailEndPos)
       // check for self collision
-      _tail.forEach(vec => {if (_.isEqual(_pos, vec)) die()})
+      _tail.forEach(vec => {if (vec.equals(_pos)) die()})
     },
     getTail: () => _tail.concat([_pos]),
-    getPos: () => _pos
+    getPos: () => _pos,
+    getDir: () => _dir
   }
 }

@@ -1,8 +1,4 @@
-# snake-2.5
-a 2.5d snake game
+# snake-3D
+I created a snake clone that runs in the browser, I created my own 3D engine for it.
 
-### [Try it out!](https://frontendcoffee.github.io/snake-2.5/)
-
-### The game currently looks like this
-
-![progress](http://i.imgur.com/jrliQQ5.png)
+### [Try it out!](https://frontendcoffee.github.io/snake-3d/)

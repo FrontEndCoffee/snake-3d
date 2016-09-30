@@ -22,7 +22,18 @@ export function snake() {
   }
   return {
     die: die,
-    setDir: dir => _dir = dir,
+    setDir: dir => {
+      if (
+        (dir.equals(DIRECTION_NORTH) && !_dir.equals(DIRECTION_SOUTH)) ||
+        (dir.equals(DIRECTION_EAST) && !_dir.equals(DIRECTION_WEST)) ||
+        (dir.equals(DIRECTION_SOUTH) && !_dir.equals(DIRECTION_NORTH)) ||
+        (dir.equals(DIRECTION_WEST) && !_dir.equals(DIRECTION_EAST) ||
+        _tail.length < 1
+      )
+      ) {
+        _dir = dir
+      }
+    },
     update: (grow = false) => {
       // get coordinates for new tail segment
       const tailEndPos = _tail[_tail.length-1] || _pos
